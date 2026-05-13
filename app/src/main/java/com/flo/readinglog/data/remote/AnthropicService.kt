@@ -1,0 +1,16 @@
+package com.flo.readinglog.data.remote
+
+import com.flo.readinglog.data.remote.model.AnthropicRequest
+import com.flo.readinglog.data.remote.model.AnthropicResponse
+import retrofit2.http.Body
+import retrofit2.http.Header
+import retrofit2.http.POST
+
+interface AnthropicService {
+    @POST("messages")
+    suspend fun createMessage(
+        @Header("x-api-key") apiKey: String,
+        @Header("anthropic-version") version: String = "2023-06-01",
+        @Body request: AnthropicRequest,
+    ): AnthropicResponse
+}

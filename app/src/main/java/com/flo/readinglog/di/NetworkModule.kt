@@ -1,8 +1,11 @@
 package com.flo.readinglog.di
 
+import com.flo.readinglog.data.remote.AnthropicService
 import com.flo.readinglog.data.remote.GoogleBooksService
 import com.flo.readinglog.data.repository.GoogleBooksRepositoryImpl
+import com.flo.readinglog.data.repository.RecommendationsRepositoryImpl
 import com.flo.readinglog.domain.repository.GoogleBooksRepository
+import com.flo.readinglog.domain.repository.RecommendationsRepository
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
@@ -19,6 +22,10 @@ import javax.inject.Singleton
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class GoogleBooksRetrofit
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class AnthropicRetrofit
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -57,4 +64,23 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideGoogleBooksRepository(impl: GoogleBooksRepositoryImpl): GoogleBooksRepository = impl
+
+    @Provides
+    @Singleton
+    @AnthropicRetrofit
+    fun provideAnthropicRetrofit(okHttpClient: OkHttpClient, json: Json): Retrofit =
+        Retrofit.Builder()
+            .baseUrl("https://api.anthropic.com/v1/")
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+
+    @Provides
+    @Singleton
+    fun provideAnthropicService(@AnthropicRetrofit retrofit: Retrofit): AnthropicService =
+        retrofit.create(AnthropicService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideRecommendationsRepository(impl: RecommendationsRepositoryImpl): RecommendationsRepository = impl
 }
