@@ -91,8 +91,7 @@ fun ReadingLogNavHost() {
             }
             composable(Screen.Books.route) {
                 BooksScreen(
-                    onBookClick = { bookId -> navController.navigate(Screen.BookDetail.createRoute(bookId)) },
-                    onAddBook = { navController.navigate(Screen.AddEntry.createRoute()) }
+                    onBookClick = { bookId -> navController.navigate(Screen.BookDetail.createRoute(bookId)) }
                 )
             }
             composable(Screen.Discover.route) { DiscoverScreen() }
