@@ -101,7 +101,8 @@ private fun MainNavHost(authViewModel: AuthViewModel) {
             composable(Screen.Today.route) {
                 TodayScreen(
                     onAddEntry = { navController.navigate(Screen.AddEntry.createRoute()) },
-                    onEditEntry = { entryId -> navController.navigate(Screen.EditEntry.createRoute(entryId)) }
+                    onEditEntry = { entryId -> navController.navigate(Screen.EditEntry.createRoute(entryId)) },
+                    onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
                 )
             }
             composable(Screen.History.route) {

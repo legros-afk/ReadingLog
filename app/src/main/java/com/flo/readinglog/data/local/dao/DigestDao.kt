@@ -15,6 +15,9 @@ interface DigestDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(digest: DigestEntity): Long
 
+    @Query("SELECT * FROM digests WHERE weekStartEpochDay = :weekStartEpochDay")
+    suspend fun getByWeekStart(weekStartEpochDay: Long): DigestEntity?
+
     @Query("SELECT * FROM digests WHERE updatedAt > :since")
     suspend fun getUpdatedSince(since: Long): List<DigestEntity>
 }

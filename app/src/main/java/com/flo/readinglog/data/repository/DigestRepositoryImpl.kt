@@ -6,6 +6,7 @@ import com.flo.readinglog.data.local.mapper.toEntity
 import com.flo.readinglog.domain.model.Digest
 import com.flo.readinglog.domain.repository.DigestRepository
 import kotlinx.coroutines.flow.map
+import java.time.LocalDate
 import javax.inject.Inject
 
 class DigestRepositoryImpl @Inject constructor(
@@ -13,6 +14,7 @@ class DigestRepositoryImpl @Inject constructor(
 ) : DigestRepository {
     override fun observeAll() = dao.observeAll().map { it.map { e -> e.toDomain() } }
     override suspend fun getById(id: Long) = dao.getById(id)?.toDomain()
+    override suspend fun getByWeekStart(weekStart: LocalDate) = dao.getByWeekStart(weekStart.toEpochDay())?.toDomain()
     override suspend fun upsert(digest: Digest): Long = dao.upsert(digest.toEntity())
     override suspend fun getUpdatedSince(since: Long) = dao.getUpdatedSince(since).map { it.toDomain() }
 }

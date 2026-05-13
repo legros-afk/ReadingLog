@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.flo.readinglog.data.sync.FirestoreSyncService
 import com.flo.readinglog.domain.repository.AuthRepository
+import com.flo.readinglog.worker.DigestWorker
 import com.flo.readinglog.worker.SyncWorker
 import androidx.work.WorkManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,6 +27,7 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             syncService.syncAll()
             SyncWorker.schedule(workManager)
+            DigestWorker.schedule(workManager)
         }
     }
 }

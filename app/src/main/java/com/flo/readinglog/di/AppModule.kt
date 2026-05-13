@@ -1,6 +1,10 @@
 package com.flo.readinglog.di
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStoreFile
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.room.Room
 import com.flo.readinglog.data.local.ReadingLogDatabase
 import com.flo.readinglog.data.local.dao.BookDao
@@ -9,9 +13,11 @@ import com.flo.readinglog.data.local.dao.ReadingEntryDao
 import com.flo.readinglog.data.repository.BookRepositoryImpl
 import com.flo.readinglog.data.repository.DigestRepositoryImpl
 import com.flo.readinglog.data.repository.ReadingEntryRepositoryImpl
+import com.flo.readinglog.data.repository.SettingsRepositoryImpl
 import com.flo.readinglog.domain.repository.BookRepository
 import com.flo.readinglog.domain.repository.DigestRepository
 import com.flo.readinglog.domain.repository.ReadingEntryRepository
+import com.flo.readinglog.domain.repository.SettingsRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,6 +37,17 @@ object AppModule {
     @Provides fun provideBookDao(db: ReadingLogDatabase): BookDao = db.bookDao()
     @Provides fun provideReadingEntryDao(db: ReadingLogDatabase): ReadingEntryDao = db.readingEntryDao()
     @Provides fun provideDigestDao(db: ReadingLogDatabase): DigestDao = db.digestDao()
+
+    @Provides
+    @Singleton
+    fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+        PreferenceDataStoreFactory.create(
+            produceFile = { context.preferencesDataStoreFile("settings") }
+        )
+
+    @Provides
+    @Singleton
+    fun provideSettingsRepository(impl: SettingsRepositoryImpl): SettingsRepository = impl
 
     @Provides
     @Singleton
