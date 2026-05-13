@@ -1,5 +1,7 @@
 package com.flo.readinglog.ui
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -9,9 +11,12 @@ import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -21,6 +26,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.flo.readinglog.ui.navigation.Screen
+import com.flo.readinglog.ui.screens.auth.SignInScreen
 import com.flo.readinglog.ui.screens.books.BooksScreen
 import com.flo.readinglog.ui.screens.detail.BookDetailScreen
 import com.flo.readinglog.ui.screens.digests.DigestsScreen
@@ -45,6 +51,20 @@ private val bottomNavRoutes = bottomNavItems.map { it.screen.route }.toSet()
 
 @Composable
 fun ReadingLogNavHost() {
+    val authViewModel: AuthViewModel = hiltViewModel()
+    val isSignedIn by authViewModel.isSignedIn.collectAsState()
+
+    when (isSignedIn) {
+        null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        false -> SignInScreen(onSignedIn = { authViewModel.onSignedIn() })
+        true -> MainNavHost(authViewModel)
+    }
+}
+
+@Composable
+private fun MainNavHost(authViewModel: AuthViewModel) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
