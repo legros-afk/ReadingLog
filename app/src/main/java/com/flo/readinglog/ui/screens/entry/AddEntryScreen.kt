@@ -209,7 +209,7 @@ private fun BookSearchResultItem(book: Book, onClick: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun EntryDatePickerDialog(
+fun EntryDatePickerDialog(
     initialDate: LocalDate,
     onDateSelected: (LocalDate) -> Unit,
     onDismiss: () -> Unit,

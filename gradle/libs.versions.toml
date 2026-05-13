@@ -1,5 +1,6 @@
 [versions]
-agp = "8.7.3"
+agp = "8.13.2"
+googleServices = "4.4.2"
 kotlin = "2.1.0"
 coreKtx = "1.15.0"
 lifecycleRuntimeKtx = "2.8.7"
@@ -74,4 +75,4 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-google-services = { id = "com.google.gms.google-services", version.ref = "agp" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
