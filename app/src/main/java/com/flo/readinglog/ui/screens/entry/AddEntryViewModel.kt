@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.flo.readinglog.domain.model.Book
 import com.flo.readinglog.domain.model.ReadingEntry
 import com.flo.readinglog.domain.repository.BookRepository
+import com.flo.readinglog.domain.repository.CharacterRepository
 import com.flo.readinglog.domain.repository.GoogleBooksRepository
 import com.flo.readinglog.domain.repository.ReadingEntryRepository
+import com.flo.readinglog.domain.usecase.CharacterStatsUseCase
 import com.flo.readinglog.domain.validation.EntryValidator
 import com.flo.readinglog.domain.validation.ValidationResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,6 +29,9 @@ data class AddEntryUiState(
     val date: LocalDate = LocalDate.now(),
     val isSaving: Boolean = false,
     val savedSuccessfully: Boolean = false,
+    val showRollResult: Boolean = false,
+    val lastRoll: Int = 0,
+    val goldEarned: Int = 0,
     val errorMessage: String? = null,
     val showDatePicker: Boolean = false,
 )
@@ -37,6 +42,7 @@ class AddEntryViewModel @Inject constructor(
     private val bookRepository: BookRepository,
     private val googleBooksRepository: GoogleBooksRepository,
     private val entryRepository: ReadingEntryRepository,
+    private val characterRepository: CharacterRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AddEntryUiState())
@@ -100,7 +106,6 @@ class AddEntryViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true) }
             try {
-                // Ensure book is persisted locally
                 val savedBook = bookRepository.getByGoogleBooksId(book.googleBooksId)
                 val bookId = savedBook?.id ?: bookRepository.upsert(book)
                 val entry = ReadingEntry(
@@ -114,7 +119,21 @@ class AddEntryViewModel @Inject constructor(
                     updatedAt = System.currentTimeMillis(),
                 )
                 entryRepository.upsert(entry)
-                _uiState.update { it.copy(isSaving = false, savedSuccessfully = true) }
+
+                val roll = (1..20).random()
+                val critBonus = if (roll == 20) 10 else 0
+                val goldEarned = CharacterStatsUseCase.goldForPages(entry.pagesRead) + critBonus
+                characterRepository.addGold(goldEarned)
+
+                _uiState.update {
+                    it.copy(
+                        isSaving = false,
+                        savedSuccessfully = true,
+                        lastRoll = roll,
+                        goldEarned = goldEarned,
+                        showRollResult = true,
+                    )
+                }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isSaving = false, errorMessage = "Failed to save: ${e.message}") }
             }

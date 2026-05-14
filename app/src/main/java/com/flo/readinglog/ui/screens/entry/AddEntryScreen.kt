@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.flo.readinglog.domain.model.Book
+import com.flo.readinglog.ui.components.D20Face
+import com.flo.readinglog.ui.components.SpinningD20
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -39,9 +41,7 @@ fun AddEntryScreen(
         if (initialBookId != null) viewModel.loadBook(initialBookId)
     }
 
-    LaunchedEffect(uiState.savedSuccessfully) {
-        if (uiState.savedSuccessfully) onNavigateUp()
-    }
+    // Navigation happens from inside RollResultDialog after the player sees their result.
 
     uiState.errorMessage?.let { msg ->
         LaunchedEffect(msg) {
@@ -185,21 +185,40 @@ fun AddEntryScreen(
                 )
             }
 
-            // Save button
+            // Save button / D20 spinning animation
             item {
-                Button(
-                    onClick = viewModel::save,
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !uiState.isSaving,
-                ) {
-                    if (uiState.isSaving) {
-                        CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
-                    } else {
+                Spacer(Modifier.height(4.dp))
+                if (uiState.isSaving) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        SpinningD20(isSaving = true, sizeDp = 72.dp)
+                        Text(
+                            "Rolling the dice...",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                } else {
+                    Button(
+                        onClick = viewModel::save,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
                         Text("✅  Complete Encounter!")
                     }
                 }
             }
         }
+    }
+
+    if (uiState.showRollResult) {
+        RollResultDialog(
+            roll = uiState.lastRoll,
+            goldEarned = uiState.goldEarned,
+            onContinue = onNavigateUp,
+        )
     }
 
     if (uiState.showDatePicker) {
@@ -263,6 +282,59 @@ private fun BookSearchResultItem(book: Book, onClick: () -> Unit) {
             )
         }
     }
+}
+
+@Composable
+private fun RollResultDialog(
+    roll: Int,
+    goldEarned: Int,
+    onContinue: () -> Unit,
+) {
+    val isCrit = roll == 20
+    AlertDialog(
+        onDismissRequest = onContinue,
+        title = {
+            Text(
+                if (isCrit) "💥 CRITICAL HIT!" else "🎲 Dice Rolled!",
+                style = MaterialTheme.typography.headlineSmall,
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                D20Face(roll = roll, sizeDp = 96.dp)
+                Text(
+                    "You rolled a $roll!",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                if (isCrit) {
+                    Text(
+                        "⚡ Natural 20 — +10 bonus gold!",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.tertiary,
+                    )
+                }
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    ),
+                ) {
+                    Text(
+                        "+$goldEarned 🪙 gold earned!",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = onContinue) { Text("Continue Quest") }
+        },
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

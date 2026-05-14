@@ -1,34 +1,15 @@
 package com.flo.readinglog.ui.screens.digests
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.flo.readinglog.domain.model.Digest
 import java.time.Instant
@@ -47,11 +28,14 @@ fun DigestsScreen(
     ) { padding ->
         if (digests.isEmpty()) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("No digests yet", style = MaterialTheme.typography.bodyLarge)
-                    Spacer(Modifier.height(8.dp))
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text("📬", fontSize = 64.sp)
+                    Text("No digests yet", style = MaterialTheme.typography.titleMedium)
                     Text(
-                        "Sent every Friday at 18:00",
+                        "Your weekly reading summary arrives every Friday at 18:00",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -87,11 +71,10 @@ private fun DigestCard(digest: Digest) {
                 Text(
                     "Week of ${digest.weekStart.format(weekFormatter)}",
                     style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary,
                 )
                 Text(
-                    Instant.ofEpochMilli(digest.sentAt)
-                        .atZone(ZoneId.systemDefault())
-                        .format(sentFormatter),
+                    Instant.ofEpochMilli(digest.sentAt).atZone(ZoneId.systemDefault()).format(sentFormatter),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

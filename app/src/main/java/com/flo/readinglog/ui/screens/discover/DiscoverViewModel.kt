@@ -44,6 +44,19 @@ class DiscoverViewModel @Inject constructor(
             recommendationsRepository.getRecommendations(bookDescriptions)
                 .onSuccess { recs ->
                     _uiState.update { it.copy(recommendations = recs, isLoading = false) }
+                    recs.forEachIndexed { i, rec ->
+                        launch {
+                            googleBooksRepository.search("${rec.title} ${rec.author}")
+                                .onSuccess { results ->
+                                    val book = results.firstOrNull() ?: return@onSuccess
+                                    _uiState.update { state ->
+                                        val updated = state.recommendations.toMutableList()
+                                        if (i < updated.size) updated[i] = updated[i].copy(coverUrl = book.coverUrl, cachedBook = book)
+                                        state.copy(recommendations = updated)
+                                    }
+                                }
+                        }
+                    }
                 }
                 .onFailure { e ->
                     _uiState.update { it.copy(isLoading = false, errorMessage = "Failed to get recommendations: ${e.message}") }
@@ -54,23 +67,27 @@ class DiscoverViewModel @Inject constructor(
     fun addToMyList(rec: RecommendedBook) {
         viewModelScope.launch {
             _uiState.update { it.copy(addingBookTitle = rec.title) }
-            googleBooksRepository.search("${rec.title} ${rec.author}")
-                .onSuccess { results ->
-                    val match = results.firstOrNull()
-                    if (match != null) {
-                        val existing = bookRepository.getByGoogleBooksId(match.googleBooksId)
-                        if (existing == null) {
-                            bookRepository.upsert(match.copy(isWantToRead = true))
+            val cached = rec.cachedBook
+            if (cached != null) {
+                val existing = bookRepository.getByGoogleBooksId(cached.googleBooksId)
+                if (existing == null) bookRepository.upsert(cached.copy(isWantToRead = true))
+                else bookRepository.setWantToRead(existing.id, true)
+            } else {
+                googleBooksRepository.search("${rec.title} ${rec.author}")
+                    .onSuccess { results ->
+                        val match = results.firstOrNull()
+                        if (match != null) {
+                            val existing = bookRepository.getByGoogleBooksId(match.googleBooksId)
+                            if (existing == null) bookRepository.upsert(match.copy(isWantToRead = true))
+                            else bookRepository.setWantToRead(existing.id, true)
                         } else {
-                            bookRepository.setWantToRead(existing.id, true)
+                            _uiState.update { it.copy(errorMessage = "Couldn't find '${rec.title}' in Google Books") }
                         }
-                    } else {
-                        _uiState.update { it.copy(errorMessage = "Couldn't find '${rec.title}' in Google Books") }
                     }
-                }
-                .onFailure { e ->
-                    _uiState.update { it.copy(errorMessage = "Search failed: ${e.message}") }
-                }
+                    .onFailure { e ->
+                        _uiState.update { it.copy(errorMessage = "Search failed: ${e.message}") }
+                    }
+            }
             _uiState.update { it.copy(addingBookTitle = null) }
         }
     }

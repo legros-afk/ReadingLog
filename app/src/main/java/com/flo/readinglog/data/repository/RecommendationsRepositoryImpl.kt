@@ -22,7 +22,7 @@ class RecommendationsRepositoryImpl @Inject constructor(
 
             Based on these favourites, please recommend 5 books I might enjoy.
             Respond ONLY with a valid JSON array (no markdown, no explanation) in this exact format:
-            [{"title":"...","author":"...","why_recommended":"..."}]
+            [{"title":"...","author":"...","why_recommended":"...","year":"2019","genres":["Fantasy","Adventure"],"synopsis":"A short 2-3 sentence synopsis of the book."}]
         """.trimIndent()
 
         val request = AnthropicRequest(

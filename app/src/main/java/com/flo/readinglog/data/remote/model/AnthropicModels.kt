@@ -32,4 +32,9 @@ data class RecommendedBook(
     val title: String,
     val author: String,
     @SerialName("why_recommended") val whyRecommended: String,
+    val year: String? = null,
+    val genres: List<String> = emptyList(),
+    val synopsis: String? = null,
+    @kotlinx.serialization.Transient val coverUrl: String? = null,
+    @kotlinx.serialization.Transient val cachedBook: com.flo.readinglog.domain.model.Book? = null,
 )

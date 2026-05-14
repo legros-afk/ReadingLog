@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -52,13 +53,23 @@ fun SignInScreen(onSignedIn: () -> Unit) {
 
     Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { padding ->
         Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text("ReadingLog", style = MaterialTheme.typography.headlineLarge)
-                Text("Sign in to keep your reading history safe", style = MaterialTheme.typography.bodyMedium)
-                Spacer(Modifier.height(16.dp))
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text("📚", fontSize = 72.sp)
+                Spacer(Modifier.height(4.dp))
+                Text("Reading Log", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary)
+                Text(
+                    "Track every page. Build your story.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(24.dp))
                 Button(
                     onClick = { launcher.launch(googleSignInClient.signInIntent) },
                     enabled = !isLoading,
+                    modifier = Modifier.fillMaxWidth(0.7f),
                 ) {
                     if (isLoading) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
                     else Text("Sign in with Google")

@@ -11,7 +11,7 @@ class GoogleBooksRepositoryImpl @Inject constructor(
 ) : GoogleBooksRepository {
 
     override suspend fun search(query: String): Result<List<Book>> = runCatching {
-        val response = service.searchBooks(query, apiKey = BuildConfig.GOOGLE_BOOKS_API_KEY)
+        val response = service.searchBooks(query, apiKey = BuildConfig.GOOGLE_BOOKS_API_KEY.takeIf { it.isNotBlank() })
         response.items?.map { item ->
             val info = item.volumeInfo
             // Force HTTPS for cover URLs (Google Books returns HTTP)
