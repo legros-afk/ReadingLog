@@ -11,10 +11,12 @@ import com.flo.readinglog.data.local.dao.BookDao
 import com.flo.readinglog.data.local.dao.DigestDao
 import com.flo.readinglog.data.local.dao.ReadingEntryDao
 import com.flo.readinglog.data.repository.BookRepositoryImpl
+import com.flo.readinglog.data.repository.CharacterRepositoryImpl
 import com.flo.readinglog.data.repository.DigestRepositoryImpl
 import com.flo.readinglog.data.repository.ReadingEntryRepositoryImpl
 import com.flo.readinglog.data.repository.SettingsRepositoryImpl
 import com.flo.readinglog.domain.repository.BookRepository
+import com.flo.readinglog.domain.repository.CharacterRepository
 import com.flo.readinglog.domain.repository.DigestRepository
 import com.flo.readinglog.domain.repository.ReadingEntryRepository
 import com.flo.readinglog.domain.repository.SettingsRepository
@@ -23,6 +25,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -38,11 +41,20 @@ object AppModule {
     @Provides fun provideReadingEntryDao(db: ReadingLogDatabase): ReadingEntryDao = db.readingEntryDao()
     @Provides fun provideDigestDao(db: ReadingLogDatabase): DigestDao = db.digestDao()
 
+    @Named("settings")
     @Provides
     @Singleton
-    fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+    fun provideSettingsDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
         PreferenceDataStoreFactory.create(
             produceFile = { context.preferencesDataStoreFile("settings") }
+        )
+
+    @Named("character")
+    @Provides
+    @Singleton
+    fun provideCharacterDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+        PreferenceDataStoreFactory.create(
+            produceFile = { context.preferencesDataStoreFile("character") }
         )
 
     @Provides
@@ -60,4 +72,8 @@ object AppModule {
     @Provides
     @Singleton
     fun provideDigestRepository(impl: DigestRepositoryImpl): DigestRepository = impl
+
+    @Provides
+    @Singleton
+    fun provideCharacterRepository(impl: CharacterRepositoryImpl): CharacterRepository = impl
 }
